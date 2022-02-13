@@ -14,12 +14,6 @@ type Flags struct {
 	FilePtr *string
 }
 
-// PracticePart represents a single part that may be selected for practice
-type PracticePart struct {
-	Name       string  `json:"name"`
-	Difficulty float64 `json:"difficulty"`
-}
-
 // GetFlags gets the user-provided flags to the program
 func GetFlags() Flags {
 	var defaultFile string
@@ -27,7 +21,7 @@ func GetFlags() Flags {
 	if err != nil {
 		defaultFile = "input.json"
 	} else {
-		defaultFile = path.Join(dirname, "input.json")
+		defaultFile = path.Join(dirname, ".practice-choice", "input.json")
 	}
 	filePtr := flag.String("f", defaultFile, "The input filename")
 
@@ -37,7 +31,7 @@ func GetFlags() Flags {
 }
 
 // LoadInput loads a JSON file from the given file pointer
-func LoadInput(filePtr *string) (data []PracticePart) {
+func LoadInput(filePtr *string) (data map[string]float64) {
 	dataRaw, err := ioutil.ReadFile(*filePtr)
 	if err != nil {
 		log.Fatal("error opening file: ", err)
@@ -50,4 +44,17 @@ func LoadInput(filePtr *string) (data []PracticePart) {
 	}
 
 	return data
+}
+
+// WriteOutput writes the JSON data to the JSON file
+func WriteOutput(filePtr *string, data map[string]float64) {
+	dataRaw, err := json.Marshal(data)
+	if err != nil {
+		log.Fatal("error making sense of data: ", err)
+	}
+
+	err = ioutil.WriteFile(*filePtr, dataRaw, 0644)
+	if err != nil {
+		log.Fatal("error writing to file: ", err)
+	}
 }
